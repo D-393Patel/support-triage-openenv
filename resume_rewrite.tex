@@ -1,0 +1,170 @@
+%-------------------------
+% One Page Optimized Resume (Rewritten for clarity, credibility, and impact)
+%-------------------------
+
+\documentclass[a4paper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[margin=0.5in, bottom=0.3in]{geometry}
+\usepackage{titlesec}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+\usepackage[sfdefault]{roboto}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\raggedbottom
+\setlength{\tabcolsep}{0in}
+\urlstyle{same}
+\pdfgentounicode=1
+
+\linespread{0.95}
+
+\titleformat{\section}{
+  \vspace{-6pt}\scshape\raggedright\large\bfseries
+}{}{0em}{}[\color{black}\titlerule \vspace{-6pt}]
+
+\setlist[itemize]{itemsep=0.5pt, topsep=1pt}
+
+\newcommand{\resumeSubheading}[4]{
+  \item
+  \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+    \textbf{#1} & #2 \\
+    \textit{\small #3} & \textit{\small #4}
+  \end{tabular*}\vspace{-5pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+  \item
+  \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+    \small\textbf{#1} & \small #2
+  \end{tabular*}\vspace{-4pt}
+}
+
+\begin{document}
+
+%----------HEADER----------
+\begin{center}
+  \textbf{\Huge \scshape Deepa Patel} \\ \vspace{2pt}
+  \small
+  +91 6386856939 $|$
+  \href{mailto:pateldeepa017@gmail.com}{pateldeepa017@gmail.com} $|$
+  Kanpur, India $|$
+  \href{https://www.linkedin.com/in/deepa-patel-71678b293/}{LinkedIn} $|$
+  \href{https://github.com/D-393Patel}{GitHub}
+\end{center}
+
+%----------SUMMARY----------
+\section{Summary}
+\begin{itemize}[leftmargin=0.15in,label={}]
+\small{
+\item Computer Science undergraduate with hands-on experience building backend APIs, automation workflows, and ML pipelines. Strong foundation in data structures, databases, and system design, with project experience across Node.js, PostgreSQL, Python, Docker, and MLOps tooling.
+}
+\end{itemize}
+
+%----------EDUCATION----------
+\section{Education}
+\begin{itemize}[leftmargin=0.15in,label={}]
+\resumeSubheading
+{Pranveer Singh Institute of Technology}{Kanpur, India}
+{B.Tech in Computer Science (AI \& ML) \;|\; CGPA: 8.89}{Aug 2023 -- Apr 2027}
+\end{itemize}
+
+%----------SKILLS----------
+\section{Technical Skills}
+\small
+\textbf{Languages}: Java, Python, C, JavaScript, TypeScript \\
+\textbf{Core CS}: Data Structures and Algorithms, Object-Oriented Programming, DBMS, Operating Systems \\
+\textbf{Backend \& Web}: Node.js, Express.js, React.js, Next.js, REST APIs, HTML, CSS \\
+\textbf{Databases}: PostgreSQL, MongoDB \\
+\textbf{Cloud \& DevOps}: Docker, CI/CD, AWS (Basics) \\
+\textbf{Tools}: Git, Linux/Unix, MLflow, DVC
+
+%----------PROJECTS----------
+\section{Projects}
+\begin{itemize}[leftmargin=0.15in,label={}]
+
+\resumeProjectHeading
+{\textbf{Nodebase -- Workflow Automation Platform} $|$ \href{https://nodeflowz.vercel.app/login}{Live} $|$ \href{https://github.com/D-393Patel/nodebase}{Code}}
+{Jan 2026 -- Mar 2026}
+\begin{itemize}[leftmargin=0.25in]
+\small{
+\item Built backend services for an API-driven workflow platform using Node.js and PostgreSQL, supporting task execution, state management, and automation flows.
+\item Implemented asynchronous job processing with retry and failure-handling logic to improve reliability for long-running tasks.
+\item Optimized database queries and added indexing for frequently accessed workflow data, reducing lookup latency in heavier usage scenarios.
+\item Added logging and monitoring hooks to help trace failures, debug issues faster, and improve service visibility during development.
+}
+\end{itemize}
+
+\resumeProjectHeading
+{\textbf{Sonique -- Real-Time Text-to-Speech Service} $|$ \href{https://sonique-production-c72f.up.railway.app/}{Live} $|$ \href{https://github.com/D-393Patel/Sonique}{Code}}
+{Feb 2026 -- Mar 2026}
+\begin{itemize}[leftmargin=0.25in]
+\small{
+\item Developed backend APIs for text-to-speech generation and audio delivery, focusing on responsive request handling and clean API design.
+\item Built REST endpoints for processing text input, generating speech output, and serving audio results to client applications.
+\item Improved request flow for concurrent usage by refining asynchronous handling and reducing unnecessary processing overhead.
+}
+\end{itemize}
+
+\resumeProjectHeading
+{\textbf{YouTube Comment Sentiment Analysis -- MLOps Pipeline} $|$ \href{https://github.com/D-393Patel/youtube-sentiment-mlops-pipeline}{Code}}
+{Dec 2025 -- Jan 2026}
+\begin{itemize}[leftmargin=0.25in]
+\small{
+\item Developed an end-to-end ML pipeline to preprocess YouTube comments, train sentiment models, and expose predictions through an API.
+\item Processed 50K+ comments and used MLflow for experiment tracking and DVC for reproducible data and model workflows.
+\item Containerized the inference pipeline with Docker to support consistent local setup and deployment.
+}
+\end{itemize}
+
+\end{itemize}
+
+%----------INTERNSHIP----------
+\section{Internship}
+\begin{itemize}[leftmargin=0.15in,label={}]
+\resumeSubheading
+{Infosys Springboard 6.0}{Nov 2025 -- Jan 2026}
+{Project Intern}{}
+\begin{itemize}[leftmargin=0.25in]
+\small{
+\item Built backend components for a price-tracking system using Python and Node.js to process product data and support comparison workflows.
+\item Designed similarity-matching logic for product records, helping reduce redundant comparisons by 40\%.
+\item Worked on performance-focused backend features with attention to efficient data processing, reliability, and maintainable service design.
+\item Collaborated in an Agile team using Git-based workflows, code reviews, and iterative feature delivery.
+}
+\end{itemize}
+\end{itemize}
+
+%----------CERTIFICATIONS----------
+\section{Certifications}
+\begin{itemize}[leftmargin=0.15in]
+\small{
+\item Oracle Cloud Infrastructure 2025 Certified Generative AI Professional
+\item Oracle Cloud Infrastructure 2025 Certified AI Foundations Associate
+\item Introduction to C Programming, NPTEL
+\item Agile Scrum in Practice, Infosys Springboard
+}
+\end{itemize}
+
+%----------ACHIEVEMENTS----------
+\section{Achievements}
+\begin{itemize}[leftmargin=0.15in,itemsep=0pt,topsep=0pt]
+\small{
+\item Solved 500+ problems across LeetCode, GeeksforGeeks, and HackerRank.
+\item Vice President, Algo Club (PSIT), 2024--2025; helped organize 3+ campus hackathons for 100+ participants.
+\item Semi-finalist, Build With India Hackathon; Level 3 Contributor, Hacktoberfest 2025.
+\item Selected for Google Gen AI Exchange Program and Aspire Leadership Program (Harvard Business School Online).
+\item Contributed to Women TechMakers technical workshops promoting inclusive technology learning.
+}
+\end{itemize}
+
+\end{document}
