@@ -35,6 +35,10 @@ Rules:
 """
 
 
+def log_event(event: str, payload: Dict[str, Any]) -> None:
+    print(f"{event} {json.dumps(payload, sort_keys=True)}")
+
+
 def load_dotenv(path: str = ".env") -> None:
     env_path = Path(path)
     if not env_path.exists():
@@ -217,6 +221,7 @@ def run_task(client: OpenAI | None, task_id: str) -> Dict[str, Any]:
     env = SupportTriageEnvironment(task_id=task_id)
     observation = env.reset(episode_id=f"baseline-{task_id}")
     history: List[Dict[str, Any]] = []
+    log_event("START", {"task_id": task_id, "mode": "model" if client else "heuristic"})
 
     while True:
         action = ask_model(client, observation, history)
@@ -230,16 +235,29 @@ def run_task(client: OpenAI | None, task_id: str) -> Dict[str, Any]:
                 "last_result": result.last_result,
             }
         )
+        log_event(
+            "STEP",
+            {
+                "task_id": task_id,
+                "step": env.state.step_count,
+                "action": action.model_dump(exclude_none=True),
+                "reward": result.reward,
+                "score": result.current_score,
+                "done": result.done,
+            },
+        )
         observation = result
         if result.done:
             break
 
-    return {
+    summary = {
         "task_id": task_id,
         "score": observation.current_score,
         "steps": env.state.step_count,
         "history": history,
     }
+    log_event("END", {"task_id": task_id, "score": observation.current_score, "steps": env.state.step_count})
+    return summary
 
 
 def main() -> None:
