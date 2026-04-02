@@ -36,7 +36,15 @@ Rules:
 
 
 def log_event(event: str, payload: Dict[str, Any]) -> None:
-    print(f"{event} {json.dumps(payload, sort_keys=True)}")
+    ordered_items = []
+    for key in sorted(payload):
+        value = payload[key]
+        if isinstance(value, (dict, list)):
+            rendered = json.dumps(value, sort_keys=True, separators=(",", ":"))
+        else:
+            rendered = str(value)
+        ordered_items.append(f"{key}={rendered}")
+    print(f"[{event}] " + " ".join(ordered_items), flush=True)
 
 
 def load_dotenv(path: str = ".env") -> None:
