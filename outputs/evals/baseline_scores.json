@@ -1,0 +1,443 @@
+{
+  "mode": "heuristic",
+  "model": "gpt-4.1-mini",
+  "api_base_url": "https://router.huggingface.co/v1",
+  "results": [
+    {
+      "task_id": "billing_refund_easy",
+      "score": 0.997,
+      "steps": 7,
+      "history": [
+        {
+          "action": {
+            "metadata": {},
+            "operation": "set_priority",
+            "ticket_id": "T-100",
+            "value": "high"
+          },
+          "reward": 0.1557,
+          "score": 0.1687,
+          "done": false,
+          "last_result": "Set T-100 priority to high."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "assign_team",
+            "ticket_id": "T-100",
+            "value": "billing"
+          },
+          "reward": 0.1556,
+          "score": 0.3343,
+          "done": false,
+          "last_result": "Assigned T-100 to billing."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-100",
+            "value": "refund"
+          },
+          "reward": 0.0729,
+          "score": 0.4172,
+          "done": false,
+          "last_result": "Added tag 'refund' to T-100."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-100",
+            "value": "duplicate-charge"
+          },
+          "reward": 0.0728,
+          "score": 0.5,
+          "done": false,
+          "last_result": "Added tag 'duplicate-charge' to T-100."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "send_reply",
+            "ticket_id": "T-100",
+            "message": "We have approved the refund for the duplicate charge. We apologize for the trouble. You will see it in 3-5 business days."
+          },
+          "reward": 0.1557,
+          "score": 0.6657,
+          "done": false,
+          "last_result": "Sent a customer reply on T-100."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "resolve_ticket",
+            "ticket_id": "T-100",
+            "value": "refund_approved"
+          },
+          "reward": 0.3213,
+          "score": 0.997,
+          "done": false,
+          "last_result": "Resolved T-100 with code refund_approved."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "submit"
+          },
+          "reward": 0.987,
+          "score": 0.997,
+          "done": true,
+          "last_result": "Submission received. Final grader score calculated."
+        }
+      ]
+    },
+    {
+      "task_id": "account_security_medium",
+      "score": 0.997,
+      "steps": 11,
+      "history": [
+        {
+          "action": {
+            "metadata": {},
+            "operation": "set_priority",
+            "ticket_id": "T-200",
+            "value": "urgent"
+          },
+          "reward": 0.0894,
+          "score": 0.2018,
+          "done": false,
+          "last_result": "Set T-200 priority to urgent."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "assign_team",
+            "ticket_id": "T-200",
+            "value": "security"
+          },
+          "reward": 0.0894,
+          "score": 0.3012,
+          "done": false,
+          "last_result": "Assigned T-200 to security."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-200",
+            "value": "account-takeover"
+          },
+          "reward": 0.0397,
+          "score": 0.3509,
+          "done": false,
+          "last_result": "Added tag 'account-takeover' to T-200."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-200",
+            "value": "verification"
+          },
+          "reward": 0.0397,
+          "score": 0.4006,
+          "done": false,
+          "last_result": "Added tag 'verification' to T-200."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "send_reply",
+            "ticket_id": "T-200",
+            "message": "We are treating this as an account security issue. Please verify your identity so we can secure the account and continue recovery."
+          },
+          "reward": 0.0894,
+          "score": 0.5,
+          "done": false,
+          "last_result": "Sent a customer reply on T-200."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "set_priority",
+            "ticket_id": "T-201",
+            "value": "low"
+          },
+          "reward": 0.0728,
+          "score": 0.5828,
+          "done": false,
+          "last_result": "Set T-201 priority to low."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "assign_team",
+            "ticket_id": "T-201",
+            "value": "billing"
+          },
+          "reward": 0.0729,
+          "score": 0.6657,
+          "done": false,
+          "last_result": "Assigned T-201 to billing."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-201",
+            "value": "invoice"
+          },
+          "reward": 0.0728,
+          "score": 0.7485,
+          "done": false,
+          "last_result": "Added tag 'invoice' to T-201."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "send_reply",
+            "ticket_id": "T-201",
+            "message": "Your VAT invoice is available now and has been sent to you."
+          },
+          "reward": 0.0728,
+          "score": 0.8313,
+          "done": false,
+          "last_result": "Sent a customer reply on T-201."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "resolve_ticket",
+            "ticket_id": "T-201",
+            "value": "invoice_sent"
+          },
+          "reward": 0.1557,
+          "score": 0.997,
+          "done": false,
+          "last_result": "Resolved T-201 with code invoice_sent."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "submit"
+          },
+          "reward": 0.987,
+          "score": 0.997,
+          "done": true,
+          "last_result": "Submission received. Final grader score calculated."
+        }
+      ]
+    },
+    {
+      "task_id": "sla_multiqueue_hard",
+      "score": 0.997,
+      "steps": 17,
+      "history": [
+        {
+          "action": {
+            "metadata": {},
+            "operation": "set_priority",
+            "ticket_id": "T-300",
+            "value": "urgent"
+          },
+          "reward": 0.0563,
+          "score": 0.2018,
+          "done": false,
+          "last_result": "Set T-300 priority to urgent."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "assign_team",
+            "ticket_id": "T-300",
+            "value": "engineering"
+          },
+          "reward": 0.0563,
+          "score": 0.2681,
+          "done": false,
+          "last_result": "Assigned T-300 to engineering."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-300",
+            "value": "outage"
+          },
+          "reward": 0.0121,
+          "score": 0.2902,
+          "done": false,
+          "last_result": "Added tag 'outage' to T-300."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-300",
+            "value": "vip"
+          },
+          "reward": 0.012,
+          "score": 0.3122,
+          "done": false,
+          "last_result": "Added tag 'vip' to T-300."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-300",
+            "value": "sla-risk"
+          },
+          "reward": 0.0121,
+          "score": 0.3343,
+          "done": false,
+          "last_result": "Added tag 'sla-risk' to T-300."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "send_reply",
+            "ticket_id": "T-300",
+            "message": "We have opened an incident with engineering and will share updates as we work through mitigation."
+          },
+          "reward": 0.0563,
+          "score": 0.4006,
+          "done": false,
+          "last_result": "Sent a customer reply on T-300."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "set_priority",
+            "ticket_id": "T-301",
+            "value": "high"
+          },
+          "reward": 0.0563,
+          "score": 0.4669,
+          "done": false,
+          "last_result": "Set T-301 priority to high."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "assign_team",
+            "ticket_id": "T-301",
+            "value": "compliance"
+          },
+          "reward": 0.0562,
+          "score": 0.5331,
+          "done": false,
+          "last_result": "Assigned T-301 to compliance."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-301",
+            "value": "gdpr"
+          },
+          "reward": 0.0232,
+          "score": 0.5663,
+          "done": false,
+          "last_result": "Added tag 'gdpr' to T-301."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-301",
+            "value": "data-deletion"
+          },
+          "reward": 0.0231,
+          "score": 0.5994,
+          "done": false,
+          "last_result": "Added tag 'data-deletion' to T-301."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "send_reply",
+            "ticket_id": "T-301",
+            "message": "We can process the delete request once we verify identity. GDPR deletion is completed within 30 days after verification."
+          },
+          "reward": 0.0563,
+          "score": 0.6657,
+          "done": false,
+          "last_result": "Sent a customer reply on T-301."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "set_priority",
+            "ticket_id": "T-302",
+            "value": "low"
+          },
+          "reward": 0.0452,
+          "score": 0.7209,
+          "done": false,
+          "last_result": "Set T-302 priority to low."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "assign_team",
+            "ticket_id": "T-302",
+            "value": "product"
+          },
+          "reward": 0.0452,
+          "score": 0.7761,
+          "done": false,
+          "last_result": "Assigned T-302 to product."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "add_tag",
+            "ticket_id": "T-302",
+            "value": "feature-request"
+          },
+          "reward": 0.0452,
+          "score": 0.8313,
+          "done": false,
+          "last_result": "Added tag 'feature-request' to T-302."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "send_reply",
+            "ticket_id": "T-302",
+            "message": "Thanks for the feedback. We have forwarded it to the product team."
+          },
+          "reward": 0.0453,
+          "score": 0.8866,
+          "done": false,
+          "last_result": "Sent a customer reply on T-302."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "resolve_ticket",
+            "ticket_id": "T-302",
+            "value": "forwarded_to_product"
+          },
+          "reward": 0.1004,
+          "score": 0.997,
+          "done": false,
+          "last_result": "Resolved T-302 with code forwarded_to_product."
+        },
+        {
+          "action": {
+            "metadata": {},
+            "operation": "submit"
+          },
+          "reward": 0.987,
+          "score": 0.997,
+          "done": true,
+          "last_result": "Submission received. Final grader score calculated."
+        }
+      ]
+    }
+  ],
+  "average_score": 0.997
+}

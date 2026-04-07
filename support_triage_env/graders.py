@@ -7,22 +7,29 @@ from typing import Dict, Iterable, Tuple
 from support_triage_env.models import GraderBreakdown, TicketView
 from support_triage_env.tasks import TaskSpec
 
+EPSILON = 0.001
+
+
+def _strict_score(value: float) -> float:
+    bounded = max(0.0, min(1.0, value))
+    return EPSILON + (1.0 - (2.0 * EPSILON)) * bounded
+
 
 def _contains_keywords(text: str | None, keywords: Iterable[str]) -> float:
     expected = [keyword.lower() for keyword in keywords]
     if not expected:
-        return 1.0
+        return _strict_score(1.0)
     haystack = (text or "").lower()
     matches = sum(1 for keyword in expected if keyword in haystack)
-    return matches / len(expected)
+    return _strict_score(matches / len(expected))
 
 
 def _tag_score(actual_tags: Iterable[str], expected_tags: Iterable[str]) -> float:
     expected = {tag.lower() for tag in expected_tags}
     if not expected:
-        return 1.0
+        return _strict_score(1.0)
     actual = {tag.lower() for tag in actual_tags}
-    return len(actual & expected) / len(expected)
+    return _strict_score(len(actual & expected) / len(expected))
 
 
 def score_ticket(ticket: TicketView, expectation) -> Tuple[float, list[str]]:
@@ -30,15 +37,17 @@ def score_ticket(ticket: TicketView, expectation) -> Tuple[float, list[str]]:
     checks = []
 
     if expectation.priority:
-        priority_score = 1.0 if ticket.current_priority == expectation.priority else 0.0
+        priority_score = _strict_score(
+            1.0 if ticket.current_priority == expectation.priority else 0.0
+        )
         checks.append(priority_score)
-        if not priority_score:
+        if priority_score <= _strict_score(0.0):
             notes.append(f"{ticket.ticket_id}: priority should be {expectation.priority}.")
 
     if expectation.team:
-        team_score = 1.0 if ticket.current_team == expectation.team else 0.0
+        team_score = _strict_score(1.0 if ticket.current_team == expectation.team else 0.0)
         checks.append(team_score)
-        if not team_score:
+        if team_score <= _strict_score(0.0):
             notes.append(f"{ticket.ticket_id}: team should be {expectation.team}.")
 
     if expectation.required_tags:
@@ -54,20 +63,24 @@ def score_ticket(ticket: TicketView, expectation) -> Tuple[float, list[str]]:
             notes.append(f"{ticket.ticket_id}: reply is missing required guidance.")
 
     if expectation.status:
-        status_score = 1.0 if ticket.current_status == expectation.status else 0.0
+        status_score = _strict_score(1.0 if ticket.current_status == expectation.status else 0.0)
         checks.append(status_score)
-        if not status_score:
+        if status_score <= _strict_score(0.0):
             notes.append(f"{ticket.ticket_id}: status should be {expectation.status}.")
 
     if expectation.resolution_code:
-        resolution_score = 1.0 if (ticket.metadata or {}).get("resolution_code") == expectation.resolution_code else 0.0
+        resolution_score = _strict_score(
+            1.0
+            if (ticket.metadata or {}).get("resolution_code") == expectation.resolution_code
+            else 0.0
+        )
         checks.append(resolution_score)
-        if not resolution_score:
+        if resolution_score <= _strict_score(0.0):
             notes.append(f"{ticket.ticket_id}: resolution should be {expectation.resolution_code}.")
 
     if not checks:
-        return 1.0, notes
-    return sum(checks) / len(checks), notes
+        return _strict_score(1.0), notes
+    return _strict_score(sum(checks) / len(checks)), notes
 
 
 def grade_task(task: TaskSpec, tickets: Dict[str, TicketView]) -> GraderBreakdown:
@@ -80,7 +93,7 @@ def grade_task(task: TaskSpec, tickets: Dict[str, TicketView]) -> GraderBreakdow
         ticket_scores[ticket_id] = round(ticket_score, 4)
         notes.extend(ticket_notes)
 
-    overall = sum(ticket_scores.values()) / max(len(ticket_scores), 1)
+    overall = _strict_score(sum(ticket_scores.values()) / max(len(ticket_scores), 1))
     return GraderBreakdown(
         overall_score=round(overall, 4),
         ticket_scores=ticket_scores,
