@@ -16,7 +16,7 @@ from support_triage_env.server.environment import SupportTriageEnvironment
 from support_triage_env.tasks import TASKS
 
 API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY")
+API_KEY = os.getenv("API_KEY") or os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY")
 MODEL_NAME = os.getenv("MODEL_NAME")
 OUTPUT_PATH = Path("outputs/evals/baseline_scores.json")
 TEMPERATURE = 0.0
@@ -273,7 +273,12 @@ def main() -> None:
         load_dotenv()
     global API_BASE_URL, API_KEY, MODEL_NAME
     API_BASE_URL = os.getenv("API_BASE_URL") or API_BASE_URL
-    API_KEY = os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY") or API_KEY
+    API_KEY = (
+        os.getenv("API_KEY")
+        or os.getenv("HF_TOKEN")
+        or os.getenv("OPENAI_API_KEY")
+        or API_KEY
+    )
     MODEL_NAME = os.getenv("MODEL_NAME") or MODEL_NAME
 
     client: OpenAI | None = None

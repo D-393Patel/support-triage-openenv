@@ -98,14 +98,14 @@ Run the baseline with an external model if credentials are available:
 ```bash
 export API_BASE_URL="https://router.huggingface.co/v1"
 export MODEL_NAME="your-model"
-export HF_TOKEN="hf_xxx"
+export API_KEY="your-provider-key"
 python inference.py
 ```
 
 Run the baseline with no external API access:
 
 ```bash
-LOAD_DOTENV=0 HF_TOKEN= OPENAI_API_KEY= MODEL_NAME=
+LOAD_DOTENV=0 API_KEY= HF_TOKEN= OPENAI_API_KEY= MODEL_NAME=
 python inference.py
 ```
 
@@ -127,7 +127,7 @@ docker run --rm -p 8000:8000 support-triage-env
 - Use Docker SDK for the Space.
 - Tag the Space with `openenv`.
 - Expose port `8000`.
-- Optional: set `API_BASE_URL`, `MODEL_NAME`, and `HF_TOKEN` in the Space secrets if you want model-backed inference.
+- Optional: set `API_BASE_URL`, `MODEL_NAME`, and `API_KEY` in the environment if you want model-backed inference.
 - The included baseline also works without any external API credentials by falling back to a deterministic heuristic policy.
 
 ## Baseline scores
