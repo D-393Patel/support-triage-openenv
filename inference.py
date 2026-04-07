@@ -17,7 +17,7 @@ from support_triage_env.tasks import TASKS
 
 API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
 API_KEY = os.getenv("API_KEY") or os.getenv("HF_TOKEN") or os.getenv("OPENAI_API_KEY")
-MODEL_NAME = os.getenv("MODEL_NAME")
+MODEL_NAME = os.getenv("MODEL_NAME") or "gpt-4.1-mini"
 OUTPUT_PATH = Path("outputs/evals/baseline_scores.json")
 TEMPERATURE = 0.0
 MAX_TOKENS = 300
@@ -80,37 +80,53 @@ def parse_action(raw_text: str, observation: SupportTriageObservation) -> Suppor
         return heuristic_action(observation)
 
 
+def classify_ticket(ticket) -> str:
+    text = " ".join(
+        [ticket.subject, ticket.summary, " ".join(ticket.visible_context)]
+    ).lower()
+
+    if any(keyword in text for keyword in ["charged twice", "duplicate charge", "refund"]):
+        return "refund"
+    if any(keyword in text for keyword in ["vat invoice", "invoice"]):
+        return "invoice"
+    if any(keyword in text for keyword in ["mfa", "compromise", "password changed", "security"]):
+        return "security"
+    if any(
+        keyword in text
+        for keyword in ["gdpr", "personal data", "data deletion", "delete all personal data"]
+    ):
+        return "gdpr"
+    if any(
+        keyword in text
+        for keyword in ["timing out", "production traffic", "revenue events", "incident", "sla breach"]
+    ):
+        return "outage"
+    return "feature"
+
+
 def heuristic_action(observation: SupportTriageObservation) -> SupportTriageAction:
     for ticket in observation.tickets:
-        if not ticket.visible_context:
-            return SupportTriageAction(operation="inspect_ticket", ticket_id=ticket.ticket_id)
-
-    for ticket in observation.tickets:
-        text = " ".join(
-            [ticket.subject, ticket.summary, " ".join(ticket.visible_context)]
-        ).lower()
+        kind = classify_ticket(ticket)
 
         if ticket.current_priority is None:
-            if "outage" in text or "compromise" in text or "mfa" in text:
-                return SupportTriageAction(
-                    operation="set_priority", ticket_id=ticket.ticket_id, value="urgent"
-                )
-            if "gdpr" in text or "duplicate charge" in text or "charged twice" in text:
-                return SupportTriageAction(
-                    operation="set_priority", ticket_id=ticket.ticket_id, value="high"
-                )
+            if kind in {"outage", "security"}:
+                priority = "urgent"
+            elif kind in {"gdpr", "refund"}:
+                priority = "high"
+            else:
+                priority = "low"
             return SupportTriageAction(
-                operation="set_priority", ticket_id=ticket.ticket_id, value="low"
+                operation="set_priority", ticket_id=ticket.ticket_id, value=priority
             )
 
         if ticket.current_team is None:
-            if "billing" in text or "invoice" in text or "refund" in text or "charge" in text:
+            if kind in {"refund", "invoice"}:
                 team = "billing"
-            elif "gdpr" in text or "personal data" in text:
+            elif kind == "gdpr":
                 team = "compliance"
-            elif "outage" in text or "api" in text:
+            elif kind == "outage":
                 team = "engineering"
-            elif "mfa" in text or "compromise" in text or "security" in text:
+            elif kind == "security":
                 team = "security"
             else:
                 team = "product"
@@ -126,33 +142,31 @@ def heuristic_action(observation: SupportTriageObservation) -> SupportTriageActi
             "gdpr": ["gdpr", "data-deletion"],
             "feature": ["feature-request"],
         }
-        for keyword, tags in expected_tags.items():
-            if keyword in text:
-                for tag in tags:
-                    if tag not in ticket.tags:
-                        return SupportTriageAction(
-                            operation="add_tag", ticket_id=ticket.ticket_id, value=tag
-                        )
+        for tag in expected_tags[kind]:
+            if tag not in ticket.tags:
+                return SupportTriageAction(
+                    operation="add_tag", ticket_id=ticket.ticket_id, value=tag
+                )
 
         if ticket.last_reply is None:
-            if "refund" in text or "charge" in text:
+            if kind == "refund":
                 message = (
-                    "We have approved the refund for the duplicate charge. Sorry for the trouble. "
+                    "We have approved the refund for the duplicate charge. We apologize for the trouble. "
                     "You will see it in 3-5 business days."
                 )
-            elif "invoice" in text:
+            elif kind == "invoice":
                 message = "Your VAT invoice is available now and has been sent to you."
-            elif "mfa" in text or "compromise" in text:
+            elif kind == "security":
                 message = (
                     "We are treating this as an account security issue. Please verify your identity "
                     "so we can secure the account and continue recovery."
                 )
-            elif "gdpr" in text or "personal data" in text:
+            elif kind == "gdpr":
                 message = (
                     "We can process the delete request once we verify identity. GDPR deletion is "
                     "completed within 30 days after verification."
                 )
-            elif "outage" in text:
+            elif kind == "outage":
                 message = (
                     "We have opened an incident with engineering and will share updates as we work "
                     "through mitigation."
@@ -163,16 +177,11 @@ def heuristic_action(observation: SupportTriageObservation) -> SupportTriageActi
                 operation="send_reply", ticket_id=ticket.ticket_id, message=message
             )
 
-        if ticket.current_status != "resolved" and (
-            "refund" in text
-            or "invoice" in text
-            or "feature request" in text
-            or "dark mode" in text
-        ):
+        if ticket.current_status != "resolved" and kind in {"refund", "invoice", "feature"}:
             resolution = "refund_approved"
-            if "invoice" in text:
+            if kind == "invoice":
                 resolution = "invoice_sent"
-            if "feature request" in text or "dark mode" in text:
+            if kind == "feature":
                 resolution = "forwarded_to_product"
             return SupportTriageAction(
                 operation="resolve_ticket", ticket_id=ticket.ticket_id, value=resolution
@@ -186,7 +195,7 @@ def ask_model(
     observation: SupportTriageObservation,
     history: List[Dict[str, Any]],
 ) -> SupportTriageAction:
-    if client is None or not MODEL_NAME:
+    if client is None:
         return heuristic_action(observation)
 
     payload = [
@@ -213,7 +222,7 @@ def ask_model(
             )
             raw_text = response.choices[0].message.content or ""
             return parse_action(raw_text, observation)
-        except APIError as exc:
+        except Exception as exc:
             if attempt == MAX_RETRIES:
                 print(
                     f"Model request failed after {MAX_RETRIES} attempts ({exc}). "
@@ -283,7 +292,7 @@ def main() -> None:
 
     client: OpenAI | None = None
     run_mode = "heuristic"
-    if API_KEY and MODEL_NAME:
+    if API_KEY and API_BASE_URL:
         client = OpenAI(
             base_url=API_BASE_URL,
             api_key=API_KEY,
