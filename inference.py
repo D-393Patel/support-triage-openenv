@@ -106,6 +106,10 @@ def classify_ticket(ticket) -> str:
 
 def heuristic_action(observation: SupportTriageObservation) -> SupportTriageAction:
     for ticket in observation.tickets:
+        if not ticket.visible_context:
+            return SupportTriageAction(operation="inspect_ticket", ticket_id=ticket.ticket_id)
+
+    for ticket in observation.tickets:
         kind = classify_ticket(ticket)
 
         if ticket.current_priority is None:
@@ -159,7 +163,7 @@ def heuristic_action(observation: SupportTriageObservation) -> SupportTriageActi
             elif kind == "security":
                 message = (
                     "We are treating this as an account security issue. Please verify your identity "
-                    "so we can secure the account and continue recovery."
+                    "so we can secure the account and workspace, review the suspicious access, and continue recovery."
                 )
             elif kind == "gdpr":
                 message = (

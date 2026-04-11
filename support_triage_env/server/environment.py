@@ -60,6 +60,7 @@ class SupportTriageEnvironment(Environment):
         )
 
         for seed_ticket in task.tickets:
+            expectation = task.expectations[seed_ticket.ticket_id]
             self._tickets[seed_ticket.ticket_id] = TicketView(
                 ticket_id=seed_ticket.ticket_id,
                 customer_tier=seed_ticket.customer_tier,
@@ -70,7 +71,16 @@ class SupportTriageEnvironment(Environment):
                 tags=[],
                 visible_context=[],
                 sla_minutes_remaining=seed_ticket.sla_minutes_remaining,
-                metadata={"hidden_context": list(seed_ticket.hidden_context)},
+                metadata={
+                    "hidden_context": list(seed_ticket.hidden_context),
+                    "inspected": False,
+                    "acted_before_inspect": False,
+                    "safety_breach": False,
+                    "sla_breach": False,
+                    "first_correct_priority_step": None,
+                    "first_correct_team_step": None,
+                    "expect_open": expectation.status == "open",
+                },
             )
 
         breakdown = self._grade()
@@ -96,6 +106,8 @@ class SupportTriageEnvironment(Environment):
             reward_penalty = -0.08
             self._last_result = str(exc)
 
+        self._update_dynamics()
+
         if self._state.step_count >= self._max_steps:
             done = True
             self._last_result = f"{self._last_result} Episode ended due to step limit."
@@ -118,10 +130,18 @@ class SupportTriageEnvironment(Environment):
         ticket = self._tickets.get(action.ticket_id)
         if ticket is None:
             raise ValueError(f"Unknown ticket_id: {action.ticket_id}")
+        assert self._task is not None
+        expectation = self._task.expectations[action.ticket_id]
+        metadata = deepcopy(ticket.metadata or {})
+
+        if action.operation != "inspect_ticket" and expectation.must_inspect and not metadata.get("inspected"):
+            metadata["acted_before_inspect"] = True
 
         if action.operation == "inspect_ticket":
-            hidden_context = list((ticket.metadata or {}).get("hidden_context", []))
+            hidden_context = list(metadata.get("hidden_context", []))
             ticket.visible_context = hidden_context
+            metadata["inspected"] = True
+            ticket.metadata = metadata
             self._last_result = f"Inspected {ticket.ticket_id} and revealed internal policy notes."
             return
 
@@ -130,6 +150,9 @@ class SupportTriageEnvironment(Environment):
             if value not in VALID_PRIORITIES:
                 raise ValueError(f"Invalid priority: {action.value}")
             ticket.current_priority = value
+            if value == expectation.priority and metadata.get("first_correct_priority_step") is None:
+                metadata["first_correct_priority_step"] = self._state.step_count
+            ticket.metadata = metadata
             self._last_result = f"Set {ticket.ticket_id} priority to {value}."
             return
 
@@ -138,6 +161,9 @@ class SupportTriageEnvironment(Environment):
             if value not in VALID_TEAMS:
                 raise ValueError(f"Invalid team: {action.value}")
             ticket.current_team = value
+            if value == expectation.team and metadata.get("first_correct_team_step") is None:
+                metadata["first_correct_team_step"] = self._state.step_count
+            ticket.metadata = metadata
             self._last_result = f"Assigned {ticket.ticket_id} to {value}."
             return
 
@@ -147,6 +173,7 @@ class SupportTriageEnvironment(Environment):
             tag = action.value.strip().lower()
             if tag not in ticket.tags:
                 ticket.tags.append(tag)
+            ticket.metadata = metadata
             self._last_result = f"Added tag '{tag}' to {ticket.ticket_id}."
             return
 
@@ -154,14 +181,18 @@ class SupportTriageEnvironment(Environment):
             if not action.message:
                 raise ValueError("message is required for send_reply.")
             ticket.last_reply = action.message.strip()
+            ticket.metadata = metadata
             self._last_result = f"Sent a customer reply on {ticket.ticket_id}."
             return
 
         if action.operation == "resolve_ticket":
             if not action.value:
                 raise ValueError("Resolution code is required.")
-            metadata = deepcopy(ticket.metadata or {})
             metadata["resolution_code"] = action.value.strip().lower()
+            if expectation.status == "open" or (
+                expectation.must_inspect and not metadata.get("inspected")
+            ):
+                metadata["safety_breach"] = True
             ticket.metadata = metadata
             ticket.current_status = "resolved"
             self._last_result = (
@@ -174,6 +205,30 @@ class SupportTriageEnvironment(Environment):
     def _grade(self) -> GraderBreakdown:
         assert self._task is not None
         return grade_task(self._task, self._tickets)
+
+    def _update_dynamics(self) -> None:
+        if self._task is None:
+            return
+
+        for ticket_id, expectation in self._task.expectations.items():
+            ticket = self._tickets[ticket_id]
+            metadata = deepcopy(ticket.metadata or {})
+
+            if (
+                expectation.priority_due_step is not None
+                and self._state.step_count > expectation.priority_due_step
+                and ticket.current_priority != expectation.priority
+            ):
+                metadata["sla_breach"] = True
+
+            if (
+                expectation.team_due_step is not None
+                and self._state.step_count > expectation.team_due_step
+                and ticket.current_team != expectation.team
+            ):
+                metadata["sla_breach"] = True
+
+            ticket.metadata = metadata
 
     def _observation(
         self,

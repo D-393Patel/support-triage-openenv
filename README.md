@@ -7,18 +7,18 @@ The domain is useful for training and evaluation because support operations requ
 ## Why this environment
 
 - It models work that humans actually do in SaaS support teams.
-- It supports dense rewards through partial credit on routing, prioritization, tagging, replies, and closure decisions.
-- It exposes deterministic graders, so success is reproducible and hard to game.
-- It includes increasing difficulty from a single billing ticket to a multi-queue enterprise workload.
+- It supports dense rewards through partial credit on routing, prioritization, tagging, replies, inspection discipline, and closure decisions.
+- It exposes deterministic graders with safety and timeliness checks, so success is reproducible and harder to game.
+- It includes a family of easy, medium, and hard queue variants instead of a single fixed script per difficulty.
 
 ## Tasks
 
-1. `billing_refund_easy`
-   Single duplicate-charge refund ticket. The agent must inspect the ticket, route it to billing, tag it correctly, communicate the refund timeline, and resolve it safely.
-2. `account_security_medium`
-   Two-ticket queue mixing a suspected account takeover with a routine invoice request. The agent must keep the security case open while resolving the invoice task.
-3. `sla_multiqueue_hard`
-   Three-ticket queue covering an enterprise outage, a GDPR deletion request, and a product feature request. The agent must protect an SLA-sensitive incident, route compliance work correctly, and only resolve the feature request.
+1. Easy variants
+   Billing refund, invoice-copy, and feature-feedback queues where internal policy inspection determines whether and how the ticket may be safely closed.
+2. Medium variants
+   Multi-ticket mixes of security, privacy, refund, and invoice work where one case must remain open while another can be completed.
+3. Hard variants
+   Three-ticket enterprise queues combining outage, security, privacy, billing, and product work with SLA-sensitive escalation deadlines and irreversible safety mistakes.
 
 ## Action space
 
@@ -51,7 +51,7 @@ Each `SupportTriageObservation` includes:
 - `allowed_operations`: valid action list
 - `last_result`: natural-language effect of the previous action
 - `remaining_steps`: episode budget
-- `current_score`: current deterministic grader score in `[0.0, 1.0]`
+- `current_score`: current deterministic grader score in `(0.0, 1.0)`
 - `grader_breakdown`: per-ticket numeric progress signals without exposing hidden grader hints
 
 ## Reward design
@@ -60,7 +60,11 @@ The reward is shaped as:
 
 `delta(grader_score) - action_cost + final_score_bonus_on_submit`
 
-This gives positive signal for partial progress, a small per-step penalty to discourage wandering, and a larger penalty for invalid actions.
+This gives positive signal for partial progress, a small per-step penalty to discourage wandering, and a larger penalty for invalid actions. Ticket grading also factors in:
+
+- whether internal context was inspected before irreversible actions
+- whether urgent ownership changes happened by SLA-sensitive steps
+- whether the agent committed unsafe actions such as resolving cases that should stay open
 
 ## Project structure
 
@@ -135,7 +139,7 @@ docker run --rm -p 8000:8000 support-triage-env
 Current local baseline artifact:
 
 - Mode: model with heuristic fallback
-- Average score: `0.9148`
+- Average score: `0.997`
 - Output file: [baseline_scores.json](C:\Users\Slim-5\OneDrive\Desktop\Project\outputs\evals\baseline_scores.json)
 
 The baseline runner is intentionally resilient: if model credentials are absent or provider credits are exhausted, it still completes successfully using the deterministic heuristic policy.
